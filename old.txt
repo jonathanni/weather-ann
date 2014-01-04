@@ -1,0 +1,123 @@
+  /*
+  // Forward propagation
+  void updateNode(int level, int x, int y, int sector, float * weights, float * node, float * bottom, float * top, int sbot, int smid, int stop, int ch)
+  {
+    int i = 0;
+    int x1 = 0, y1 = 0, z1 = 0;
+
+    int weightind = sector * (GRID_SIZE * (sbot + smid + stop) * 4) \
+		  + (level - 1) * (GRID_SIZE * (sbot + smid + stop)) \
+		  + y * (WIDTH * (sbot + smid + stop)) \
+		  + x * (sbot + smid + stop);
+    int sizes[3] = {sbot, smid, stop};
+    float * nodes[3] = {bottom, node, top};
+
+    int nodeind = sector * NODE_SIZE + level * GRID_SIZE + y * WIDTH + x;
+    float total = 0;
+
+    // Handle wrap
+    int subtotal = 0;
+    for(i = 0; i < 3; i++)
+      if(sizes[i] != 0)
+      {
+	for(x1 = 0; x1 < sizes[i] / 9; x1++)
+	  for(y1 = 0; y1 < 3; y1++)
+	    for(z1 = 0; z1 < 3; z1++)
+	      total += weights[weightind + subtotal + x1 * 9 + y1 * 3 + z1] \
+		     * nodes[i][x1 * NODE_SIZE + (level - 1) * GRID_SIZE \
+			      + wrap((y + (y1 - 1)), 0, HEIGHT) * WIDTH + wrap((x + (z1 - 1)), 0, WIDTH)];
+        subtotal += sizes[i];
+      }
+    node[nodeind] = sigmoid(total, sbot + smid + stop);
+  }
+  */
+
+  /*
+  // Pre-backpropagation: sbot and stop mean the SUM to reach the middle
+  void updateError(int level, int sector, float * weight, float * wbottom, float * wtop, float * node, float * actual, \
+		   float * error, float * ebottom, float * etop, int sbot, int smid, int stop, \
+		   int cbot, int ctop, int abot, int atop, bool isOutput)
+  {
+    int i = 0, j = 0, k = 0;
+    int sizes[3] = {sbot, smid, stop};
+    int chunks[3] = {cbot, sbot + smid + stop, ctop};
+    int add[3] = {abot, sbot, atop};
+    float * errors[3] = {ebottom, error, etop};
+    float * weights[3] = {wbottom, weight, wtop};
+
+    if(isOutput)
+      for(i = 0; i < HEIGHT; i++)
+	for(j = 0; j < WIDTH; j++)
+	{
+	  const int index = sector * NODE_SIZE + level * GRID_SIZE + i * WIDTH + j;
+	  const int nnindex = sector * NODE_SIZE + i * WIDTH + j;
+          error[index] = node[index] * (1 - node[index]) * (actual[nnindex] - node[index]);
+        }
+    else
+      for(i = 0; i < HEIGHT; i++)
+	for(j = 0; j < WIDTH; j++)
+	{
+	  float total = 0;
+	  const int index = sector * NODE_SIZE + level * GRID_SIZE;
+	  const int eindex = sector * NODE_SIZE + (level + 1) * GRID_SIZE;
+          for(k = 0; k < 3; k++)
+	  {
+	  // Handle wrap
+	    if(sizes[k] != 0)
+	    {
+	      int x1 = 0, y1 = 0, z1 = 0;
+	      for(x1 = 0; x1 < sizes[k] / 9; x1++)
+                for(y1 = 0; y1 < 3; y1++)
+                  for(z1 = 0; z1 < 3; z1++)
+                  {
+		    int windex = x1 * (GRID_SIZE * chunks[k] * 4) \
+                                  + level * (GRID_SIZE * chunks[k]) \
+                                  + wrap(i + (y1 - 1), 0, HEIGHT) * (WIDTH * chunks[k]) \
+                                  + wrap(j + (z1 - 1), 0, WIDTH) * chunks[k];
+                    total += errors[k][eindex + wrap(i + (y1 - 1), 0, HEIGHT) * WIDTH + wrap(j + (z1 - 1), 0, WIDTH)] \
+                             * weights[k][windex + add[k] + sector * 9 + (2 - y1) * 3 + (2 - z1)];
+                  }
+	    }
+	  }
+	  error[index + i * WIDTH + j] = node[index + i * WIDTH + j] * (1 - node[index + i * WIDTH + j]) * total;
+        }
+  }
+  */
+
+  /*
+  // Backpropagation
+  void updateWeight(int level, int sector, float * weight, \
+		    float * node, float * bnode, float * tnode, float * error, int sbot, int smid, int stop)
+  {
+    int i = 0, j = 0, k = 0;
+
+    int sizes[3] = {sbot, smid, stop};
+    float * nodes[3] = {bnode, node, tnode};
+    
+    for(i = 0; i < HEIGHT; i++)
+      for(j = 0; j < WIDTH; j++)
+      {
+	int subtotal = 0;
+	for(k = 0; k < 3; k++)
+	  if(sizes[k] != 0)
+	  {
+	    int x1 = 0, y1 = 0, z1 = 0;
+	    for(x1 = 0; x1 < sizes[k] / 9; x1++)
+	      for(y1 = 0; y1 < 3; y1++)
+		for(z1 = 0; z1 < 3; z1++)
+		{
+		  int windex = sector * (GRID_SIZE * (sbot + smid + stop) * 4) + \
+			       (level - 1) * (GRID_SIZE * (sbot + smid + stop)) + \
+			       i * (WIDTH * (sbot + smid + stop)) + \
+			       j * (sbot + smid + stop) + \
+			       subtotal + x1 * 9 + y1 * 3 + z1;
+		  int eindex = sector * NODE_SIZE + level * GRID_SIZE + i * WIDTH + j;
+		  int nindex = sector * NODE_SIZE + (level - 1) * GRID_SIZE + \
+			       wrap(i + (y1 - 1), 0, HEIGHT) *  WIDTH + wrap(j + (z1 - 1), 0, WIDTH);
+		  weight[windex] += LEARNING_RATE * error[eindex] * nodes[k][nindex];
+		}
+	    subtotal += sizes[k];
+	  }
+      }
+  }
+  */
