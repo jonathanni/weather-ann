@@ -1,4 +1,5 @@
 #ifndef _VARS_GUARD
+
 #define _VARS_GUARD
 
 #define TEMP 0
@@ -9,23 +10,25 @@
 #define SSTP 5
 #define PREW 6
 
-#define LEARNING_RATE 0.025f
+#define LEARNING_RATE 0.2f
 
 #define SIG_SCALE 6.0f
 
-#define WIDTH 144
-#define HEIGHT 73
+#define WIDTH 3 
+#define HEIGHT 3
 
-#define HIDDEN_LAYERS 7
+#define G_WIDTH 144
+#define G_HEIGHT 73
+
+#define HIDDEN_LAYERS 3
 
 #define SAMPLE_SIZE 4
 
 #define GRID_SIZE (WIDTH * HEIGHT)
 #define NODE_SIZE ((HIDDEN_LAYERS + 1) * GRID_SIZE + SAMPLE_SIZE * GRID_SIZE)
 
-#define X 77.5f
-#define Y 37.5f
-#define R 1
+#define X 113 // 77.5f
+#define Y 21 // 37.5f
 
 #define WEIGHT_SURF_NUM_1 (0)
 #define WEIGHT_SURF_NUM_2 (9 * 7)
