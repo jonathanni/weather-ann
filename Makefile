@@ -1,11 +1,11 @@
 CC=gcc
-NVCC=nvcc
+NVCC=/usr/local/cuda/bin/nvcc
 
 # NVCCFLAGS must have -O2 or IT WILL GENERATE BUGS!!!
 CFLAGS=-c -O3 -Wall -Wextra
 NVCCFLAGS=-c -O2 -gencode=arch=compute_20,code=sm_20
-LDFLAGS=-L/usr/local/lib -L/usr/local/cuda-5.5/lib64 -lnetcdf -lm -lcuda -lcudart
-IFLAGS=-I/usr/local/cuda-5.5/include
+LDFLAGS=-L/usr/local/lib -L/usr/local/cuda/lib64 -lnetcdf -lm -lcuda -lcudart
+IFLAGS=-I/usr/local/cuda/include
 
 SOURCES=model.c logger.c error.c
 CUSOURCES=engine.cu

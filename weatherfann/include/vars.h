@@ -10,11 +10,11 @@
 #define SSTP 5
 #define PREW 6
 
-#define LEARNING_RATE 0.2f
+#define LEARNING_RATE 0.8f
 
 #define SIG_SCALE 6.0f
 
-#define BATCH_SIZE 16
+#define BATCH_SIZE 64
 
 #define WIDTH 3 
 #define HEIGHT 3
@@ -24,12 +24,14 @@
 
 #define GRID_SIZE (WIDTH * HEIGHT)
 #define SINGLE_SEGMENT (GRID_SIZE * (7 + 5 + 5 + 5 + 5 + 5))
-#define SAMPLE_SIZE 4
+#define SAMPLE_SIZE 8
 
-#define CONNECTION_RATE 0.2f
-#define MAX_EPOCHS 10000
-#define EPOCHS_BETWEEN_REPORTS 1000
-#define DESIRED_ERROR 0.00001f
+#define CONNECTION_RATE 0.087f
+#define MAX_EPOCHS 100000
+#define MAX_NEURONS 10000
+#define EPOCHS_BETWEEN_REPORTS 500
+#define NEURONS_BETWEEN_REPORTS 500
+#define DESIRED_ERROR 0.00002f
 
 #define X 113 // 77.5f
 #define Y 21 // 37.5f

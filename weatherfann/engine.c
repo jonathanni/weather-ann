@@ -67,11 +67,16 @@ static float var_min[7], var_max[7];
 struct fann * network = 0;
 struct fann_train_data * data = 0;
 
+// Write NetCDF files
+int forecastncid = 0;
+int forecastvarids[11];
+
 void openNetwork()
 {
   FILE * file = fopen("../../network/network.net", "r");
   if(file == NULL)
     network = fann_create_sparse(CONNECTION_RATE, 4, SINGLE_SEGMENT * SAMPLE_SIZE, SINGLE_SEGMENT, SINGLE_SEGMENT, SINGLE_SEGMENT);
+    //network = fann_create_shortcut(2, SINGLE_SEGMENT * SAMPLE_SIZE, SINGLE_SEGMENT);
   else
   {
     fclose(file);
@@ -88,6 +93,8 @@ void closeNetwork()
 
 void setNetworkOptions()
 {
+  fann_set_training_algorithm(network, FANN_TRAIN_QUICKPROP);
+  fann_set_learning_rate(network, LEARNING_RATE);
   fann_set_activation_function_hidden(network, FANN_SIGMOID_SYMMETRIC);
   fann_set_activation_function_output(network, FANN_SIGMOID_SYMMETRIC);
 }
@@ -365,52 +372,60 @@ void closeTimes()
   safeFree(astime);
 }
 
-void writeNetCDF(fann_type * data, char * year, int index, int timelapse)
+void openNetCDF(char * year, int index, int toffset)
 {
-  int i = 0, j = 0;
+  int i = 0;
   char buf[256];
-  int forecastncid, varids[10], datadimids[3], leveldimids[1], londimids[1], latdimids[1];
+  int datadimids[4], leveldimids[1], londimids[1], latdimids[1], timedimids[1];
   char * datanames[] = {"air_temperature", "heights", "rel_humidity", "u_wind", "v_wind", "sst", "pr_water"};
 
-  snprintf(buf, 255, "../../forecast/forecast.%.4s.%d.%03dhr.nc", year, index, timelapse);
+  snprintf(buf, 255, "../../forecast/forecast.%.4s.%d.nc", year, index);
 
   e_netcdf(nc_create(buf, NC_CLOBBER, &forecastncid));
   loginfo("Created NetCDF file...\n");
-  e_netcdf(nc_def_dim(forecastncid, "level", 6, &datadimids[0]));
-  e_netcdf(nc_def_dim(forecastncid, "lat", 3, &datadimids[1]));
-  e_netcdf(nc_def_dim(forecastncid, "lon", 3, &datadimids[2]));
+
+  e_netcdf(nc_def_dim(forecastncid, "time", 64, &datadimids[0]));
+  e_netcdf(nc_def_dim(forecastncid, "level", 6, &datadimids[1]));
+  e_netcdf(nc_def_dim(forecastncid, "lat", 3, &datadimids[2]));
+  e_netcdf(nc_def_dim(forecastncid, "lon", 3, &datadimids[3]));
+
   loginfo("Created dimensions...\n");
 
-  londimids[0] = datadimids[2];
-  latdimids[0] = datadimids[1];
-  leveldimids[0] = datadimids[0];
+  londimids[0]   = datadimids[3];
+  latdimids[0]   = datadimids[2];
+  leveldimids[0] = datadimids[1];
+  timedimids[0]  = datadimids[0];
 
   for(i = 0; i < 7; i++)
-    e_netcdf(nc_def_var(forecastncid, datanames[i], NC_FLOAT, 3, datadimids, &varids[i]));
+    e_netcdf(nc_def_var(forecastncid, datanames[i], NC_FLOAT, 4, datadimids, &forecastvarids[i]));
 
-  e_netcdf(nc_def_var(forecastncid, "level", NC_FLOAT, 1, leveldimids, &varids[7]));
-  e_netcdf(nc_def_var(forecastncid, "lon", NC_FLOAT, 1, londimids, &varids[8]));
-  e_netcdf(nc_def_var(forecastncid, "lat", NC_FLOAT, 1, latdimids, &varids[9]));
+  e_netcdf(nc_def_var(forecastncid, "level", NC_FLOAT, 1, leveldimids, &forecastvarids[7]));
+  e_netcdf(nc_def_var(forecastncid, "lon", NC_FLOAT, 1, londimids, &forecastvarids[8]));
+  e_netcdf(nc_def_var(forecastncid, "lat", NC_FLOAT, 1, latdimids, &forecastvarids[9]));
+  e_netcdf(nc_def_var(forecastncid, "time", NC_INT, 1, timedimids, &forecastvarids[10]));
   
   loginfo("Defined all vars...\n");
 
-  e_netcdf(nc_put_att_text(forecastncid, varids[7], "units", 8, "millibar"));
-  e_netcdf(nc_put_att_text(forecastncid, varids[8], "units", 11, "degree_east"));
-  e_netcdf(nc_put_att_text(forecastncid, varids[9], "units", 12, "degree_north"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[7], "units", 8, "millibar"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[8], "units", 11, "degree_east"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[9], "units", 12, "degree_north"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[10], "units", 27, "hours since 1-1-1 00:00:0.0"));
 
-  e_netcdf(nc_put_att_text(forecastncid, varids[7], "long_name", 5, "Level"));
-  e_netcdf(nc_put_att_text(forecastncid, varids[8], "long_name", 9, "Longitude"));
-  e_netcdf(nc_put_att_text(forecastncid, varids[9], "long_name", 8, "Latitude"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[7], "long_name", 5, "Level"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[8], "long_name", 9, "Longitude"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[9], "long_name", 8, "Latitude"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[10], "long_name", 4, "Time"));
 
-  e_netcdf(nc_put_att_text(forecastncid, varids[7], "axis", 1, "Z"));
-  e_netcdf(nc_put_att_text(forecastncid, varids[8], "axis", 1, "X"));
-  e_netcdf(nc_put_att_text(forecastncid, varids[9], "axis", 1, "Y"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[7],  "axis", 1, "Z"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[8],  "axis", 1, "X"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[9],  "axis", 1, "Y"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[10], "axis", 1, "T"));
 
-  e_netcdf(nc_put_att_text(forecastncid, varids[7], "positive", 4, "down"));
+  e_netcdf(nc_put_att_text(forecastncid, forecastvarids[7], "positive", 4, "down"));
 
   const char * units[] = {"degK", "m", "%", "m/s", "m/s", "degC", "kg/m^2"};
   for(i = 0; i < 7; i++)
-    e_netcdf(nc_put_att_text(forecastncid, varids[i], "units", strlen(units[i]), units[i]));
+    e_netcdf(nc_put_att_text(forecastncid, forecastvarids[i], "units", strlen(units[i]), units[i]));
 
   loginfo("Defined all attributes..\n");
 
@@ -420,17 +435,37 @@ void writeNetCDF(fann_type * data, char * year, int index, int timelapse)
   float levels[6] = {1000.0f, 925.0f, 850.0f, 700.0f, 500.0f, 300.0f};
   float lon[3] = {75, 77.5, 80};
   float lat[3] = {40, 37.5, 35};
+  int times[64] = {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, \
+                   78, 84, 90, 96, 102, 108, 114, 120, 126, 132, 138, 144, \
+                   150, 156, 162, 168, 174, 180, 186, 192, 198, 204, 210, 216, \
+                   222, 228, 234, 240, 246, 252, 258, 264, 270, 276, 282, 288, \
+                   294, 300, 306, 312, 318, 324, 330, 336, 342, 348, 354, 360, 366, 372, 378, 384};
 
-  nc_put_var_float(forecastncid, varids[7], levels);
-  nc_put_var_float(forecastncid, varids[8], lon);
-  nc_put_var_float(forecastncid, varids[9], lat);
+  for(i = 0; i < 64; i++)
+    times[i] += toffset;
 
-  const size_t count[] = {1, HEIGHT, WIDTH};
+  nc_put_var_float(forecastncid, forecastvarids[7], levels);
+  nc_put_var_float(forecastncid, forecastvarids[8], lon);
+  nc_put_var_float(forecastncid, forecastvarids[9], lat);
+  nc_put_var_int(forecastncid, forecastvarids[10], times);
+}
+
+void closeNetCDF()
+{
+  e_netcdf(nc_close(forecastncid));
+  loginfo("Closed NetCDF file...\n");
+}
+
+void writeNetCDF(fann_type * data, int timelapse)
+{
+  int i = 0, j = 0;
+
+  const size_t count[] = {1, 1, HEIGHT, WIDTH};
 
   int k = 0, l = 0;
   for(i = 0; i < 6; i++)
   {
-    const size_t start[] = {i, 0, 0};
+    const size_t start[] = {timelapse / 6 - 1, i, 0, 0};
     for(j = 0; j < lengths[i]; j++)
     {
       float scaled[GRID_SIZE];
@@ -438,14 +473,11 @@ void writeNetCDF(fann_type * data, char * year, int index, int timelapse)
 	for(l = 0; l < WIDTH; l++)
 	  scaled[k * WIDTH + l] = (data[offsets[i] + j * GRID_SIZE + k * WIDTH + l] + 1) / 2 \
                                 * (var_max[j] - var_min[j]) + var_min[j];
-      e_netcdf(nc_put_vara_float(forecastncid, varids[j], start, count, scaled));
+      e_netcdf(nc_put_vara_float(forecastncid, forecastvarids[j], start, count, scaled));
     }
   }
 
   loginfo("Put all vars...\n"); 
-
-  e_netcdf(nc_close(forecastncid));
-  loginfo("Closed NetCDF file...\n");
 }
 
 void safeFree(void * ptr)
@@ -457,6 +489,9 @@ void safeFree(void * ptr)
 void train(char * year)
 {
   openNetwork();
+
+  //fann_print_connections(network);
+  //return;
 
   loginfo("Reading time information...\n");
   char * buf_year = (strcmp(year, "-1") == 0 ? getYear() : year);
@@ -491,6 +526,7 @@ void train(char * year)
   */
 
   fann_train_on_data(network, train, MAX_EPOCHS, EPOCHS_BETWEEN_REPORTS, DESIRED_ERROR);
+  //fann_cascadetrain_on_data(network, train, MAX_NEURONS, NEURONS_BETWEEN_REPORTS, DESIRED_ERROR);
   
   safeFree(train);
   
@@ -526,6 +562,9 @@ void forecast(char * year, int index)
   fann_type * input = 0, * output = 0;
   input = (fann_type *) calloc(SAMPLE_SIZE * SINGLE_SEGMENT, sizeof(fann_type));
 
+  // Initialize NetCDF file
+  openNetCDF(buf_year, index, atime[index]);
+
   while((size_t) j < stimelen - 1 && astime[j] <= atime[index])
     ++j;
 
@@ -538,26 +577,33 @@ void forecast(char * year, int index)
   loginfo("Forecasting...\n");
   output = fann_run(network, input);
 
-  writeNetCDF(output, buf_year, index, timelapse);
+  writeNetCDF(output, timelapse);
   loginfo("Write NetCDF data ");
   printf("%s yr %d index %d hr\n", buf_year, index, timelapse);
 
   for(timelapse = 12; timelapse <= 384; timelapse += 6)
   {
+    // loopback
+    memmove(input + SINGLE_SEGMENT, input, SINGLE_SEGMENT * (SAMPLE_SIZE - 1));
+    memcpy(input, output, SINGLE_SEGMENT);
+
     // forecast
+    loginfo("Forecasting...\n");
     output = fann_run(network, input);
 
-    writeNetCDF(output, buf_year, index, timelapse); 
+    //int aa = 0;
+    //for(aa = 0; aa < SINGLE_SEGMENT; aa++) printf("%.2f ", output[aa]);
+
+    writeNetCDF(output, timelapse); 
     loginfo("Write NetCDF data\n");
     printf("%s yr %d index %d hr\n", year, index, timelapse);
   }
 
   safeFree(input);
-
   safeFree(buf_year);
-  closeTimes();
 
+  closeNetCDF();
+  closeTimes();
   closeData();
-  
   closeNetwork();
 }

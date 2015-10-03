@@ -37,7 +37,9 @@ void unpackDoubleInto(double *, double *, fann_type *, int, float, float, float,
 void openTimes(void);
 void closeTimes(void);
 
-void writeNetCDF(fann_type *, char *, int, int);
+void openNetCDF(char *, int, int);
+void writeNetCDF(fann_type *, int);
+void closeNetCDF(void);
 
 void safeFree(void *);
 
