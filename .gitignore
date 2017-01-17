@@ -1,0 +1,3 @@
+*.o
+weatherfann/*.o
+model

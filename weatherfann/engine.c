@@ -210,12 +210,18 @@ void unpackSingleLevel(int timeind, int ncid, int varid, int sector, int level, 
   // is lost for converted files so that is manually inputted (scale factor and offset).
 
   // Y + 1 goes south from Y, X - 1 goes west from X
-  size_t lstart[3] = {timeind, Y + 1, X - 1};
-  size_t lcount[3] = {1, HEIGHT, WIDTH};
+//  size_t lstart[3] = {timeind, Y + 1, X - 1};
+//  size_t lcount[3] = {1, HEIGHT, WIDTH};
 
-  size_t istart[2] = {Y + 1, X - 1};
-  size_t icount[2] = {HEIGHT, WIDTH}; 
+  size_t lstart[3] = {timeind, 0, 0};
+  size_t lcount[3] = {1, G_HEIGHT, G_WIDTH};
+
+//  size_t istart[2] = {Y + 1, X - 1};
+//  size_t icount[2] = {HEIGHT, WIDTH}; 
  
+  size_t istart[2] = {0, 0};
+  size_t icount[2] = {G_HEIGHT, G_WIDTH}; 
+
   float scale_factor = 0;
   float add_offset = 0;
 
@@ -277,8 +283,11 @@ void unpackSingleLevel(int timeind, int ncid, int varid, int sector, int level, 
 
 void unpackLevel(int timeind, int ncid, int varid, int sector, int levind, int level, fann_type * data, int sample_length)
 {
-  size_t lstart[4] = {timeind, levind, Y + 1, X - 1};
-  size_t lcount[4] = {1, 1, HEIGHT, WIDTH};
+//  size_t lstart[4] = {timeind, levind, Y + 1, X - 1};
+//  size_t lcount[4] = {1, 1, HEIGHT, WIDTH};
+
+  size_t lstart[4] = {timeind, levind, 0, 0};
+  size_t lcount[4] = {1, 1, G_HEIGHT, G_WIDTH};
 
   short * buf = (short *) calloc(GRID_SIZE, sizeof(short));
   float scale_factor = 0;
@@ -460,7 +469,8 @@ void writeNetCDF(fann_type * data, int timelapse)
 {
   int i = 0, j = 0;
 
-  const size_t count[] = {1, 1, HEIGHT, WIDTH};
+//  const size_t count[] = {1, 1, HEIGHT, WIDTH};
+  const size_t count[] = {1, 1, G_HEIGHT, G_WIDTH};
 
   int k = 0, l = 0;
   for(i = 0; i < 6; i++)
@@ -469,9 +479,13 @@ void writeNetCDF(fann_type * data, int timelapse)
     for(j = 0; j < lengths[i]; j++)
     {
       float scaled[GRID_SIZE];
-      for(k = 0; k < HEIGHT; k++)
-	for(l = 0; l < WIDTH; l++)
-	  scaled[k * WIDTH + l] = (data[offsets[i] + j * GRID_SIZE + k * WIDTH + l] + 1) / 2 \
+//      for(k = 0; k < HEIGHT; k++)
+//	for(l = 0; l < WIDTH; l++)
+      for(k = 0; k < G_HEIGHT; k++)
+	for(l = 0; l < G_WIDTH; l++)
+/*	  scaled[k * WIDTH + l] = (data[offsets[i] + j * GRID_SIZE + k * WIDTH + l] + 1) / 2 \
+                                * (var_max[j] - var_min[j]) + var_min[j];*/
+	  scaled[k * G_WIDTH + l] = (data[offsets[i] + j * GRID_SIZE + k * G_WIDTH + l] + 1) / 2 \
                                 * (var_max[j] - var_min[j]) + var_min[j];
       e_netcdf(nc_put_vara_float(forecastncid, forecastvarids[j], start, count, scaled));
     }

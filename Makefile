@@ -3,7 +3,7 @@ NVCC=/usr/local/cuda/bin/nvcc
 
 # NVCCFLAGS must have -O2 or IT WILL GENERATE BUGS!!!
 CFLAGS=-c -O3 -Wall -Wextra
-NVCCFLAGS=-c -O2 -gencode=arch=compute_20,code=sm_20
+NVCCFLAGS=-c -O2 -Xcompiler -fno-aggressive-loop-optimizations -gencode=arch=compute_20,code=sm_20
 LDFLAGS=-L/usr/local/lib -L/usr/local/cuda/lib64 -lnetcdf -lm -lcuda -lcudart
 IFLAGS=-I/usr/local/cuda/include
 

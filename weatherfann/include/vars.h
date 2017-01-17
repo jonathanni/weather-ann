@@ -22,7 +22,8 @@
 #define G_WIDTH 144
 #define G_HEIGHT 73
 
-#define GRID_SIZE (WIDTH * HEIGHT)
+//#define GRID_SIZE (WIDTH * HEIGHT)
+#define GRID_SIZE (G_WIDTH * G_HEIGHT)
 #define SINGLE_SEGMENT (GRID_SIZE * (7 + 5 + 5 + 5 + 5 + 5))
 #define SAMPLE_SIZE 8
 

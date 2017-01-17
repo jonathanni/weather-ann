@@ -24,7 +24,8 @@
 
 #define SAMPLE_SIZE 4
 
-#define GRID_SIZE (WIDTH * HEIGHT)
+//#define GRID_SIZE (WIDTH * HEIGHT)
+#define GRID_SIZE (G_WIDTH * G_HEIGHT)
 #define NODE_SIZE ((HIDDEN_LAYERS + 1) * GRID_SIZE + SAMPLE_SIZE * GRID_SIZE)
 
 #define X 113 // 77.5f

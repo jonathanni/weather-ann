@@ -199,7 +199,7 @@ extern "C"
 
   void alloc()
   {
-    loginfo("Allocating memory\n");
+    logdebug("Allocating memory\n");
     n1000 = (float *) calloc((SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 7 * GRID_SIZE, sizeof(float));
     n925 = (float *) calloc((SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE, sizeof(float));
     n850 = (float *) calloc((SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE, sizeof(float));
@@ -259,7 +259,7 @@ extern "C"
 
   void dealloc()
   {
-    loginfo("Deallocating memory\n");
+    logdebug("Deallocating memory\n");
     safeFree(n1000);
     safeFree(n925);
     safeFree(n850);
@@ -369,12 +369,12 @@ extern "C"
     strcpy(inf, "Opening file: ");
     strcat(inf, name);
     strcat(inf, "\n");
-    loginfo(inf);
+    logdebug(inf);
     
     FILE * file = fopen(name, "r+");
     if(file == NULL)
     {
-      loginfo("File does not exist so creating a new one.\n");
+      logdebug("File does not exist so creating a new one.\n");
       empty = true;
       return fopen(name, "w+");
     }
@@ -390,7 +390,7 @@ extern "C"
 
   void cudaRead()
   {
-    loginfo("Read to CUDA from host\n");
+//    logdebug("Read to CUDA from host\n");
     cudaError(cudaMemcpy(gn1000, n1000, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 7 * GRID_SIZE * sizeof(float), cudaMemcpyHostToDevice));
     cudaError(cudaMemcpy(gn925, n925, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE * sizeof(float), cudaMemcpyHostToDevice));
     cudaError(cudaMemcpy(gn850, n850, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE * sizeof(float), cudaMemcpyHostToDevice));
@@ -428,7 +428,7 @@ extern "C"
   
   void cudaWrite()
   {
-    loginfo("Write to host from CUDA\n");
+//    logdebug("Write to host from CUDA\n");
     cudaError(cudaMemcpy(n1000, gn1000, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 7 * GRID_SIZE * sizeof(float), cudaMemcpyDeviceToHost));
     cudaError(cudaMemcpy(n925, gn925, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE * sizeof(float), cudaMemcpyDeviceToHost));
     cudaError(cudaMemcpy(n850, gn850, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE * sizeof(float), cudaMemcpyDeviceToHost));
@@ -476,7 +476,7 @@ extern "C"
   void readNetwork()
   {
 
-    loginfo("Reading network (only once)\n");
+    logdebug("Reading network (only once)\n");
 
     rewind(fn1000);
     rewind(fn925);
@@ -492,33 +492,33 @@ extern "C"
     rewind(fw500);
     rewind(fw250);
 
-    loginfo("Rewind...\n");  
+    logdebug("Rewind...\n");  
 
     readNetworkSegment(fn1000, n1000, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 7 * GRID_SIZE);
-    loginfo("Read 1000 hPa\n");
+    logdebug("Read 1000 hPa\n");
     readNetworkSegment(fn925, n925, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE);
-    loginfo("Read 925 hPa\n");
+    logdebug("Read 925 hPa\n");
     readNetworkSegment(fn850, n850, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE);
-    loginfo("Read 850 hPa\n");
+    logdebug("Read 850 hPa\n");
     readNetworkSegment(fn700, n700, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE);
-    loginfo("Read 700 hPa\n");
+    logdebug("Read 700 hPa\n");
     readNetworkSegment(fn500, n500, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE);
-    loginfo("Read 500 hPa\n");
+    logdebug("Read 500 hPa\n");
     readNetworkSegment(fn250, n250, (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE);
-    loginfo("Read 250 hPa\n");
+    logdebug("Read 250 hPa\n");
     
     readNetworkSegment(fw1000, w1000, (SAMPLE_SIZE + HIDDEN_LAYERS) * 7 * WEIGHT_SURF_SIZE);
-    loginfo("Read 1000 hPa weights\n");
+    logdebug("Read 1000 hPa weights\n");
     readNetworkSegment(fw925, w925, (SAMPLE_SIZE + HIDDEN_LAYERS) * 5 * WEIGHT_CSUR_SIZE);
-    loginfo("Read 925 hPa weights\n");
+    logdebug("Read 925 hPa weights\n");
     readNetworkSegment(fw850, w850, (SAMPLE_SIZE + HIDDEN_LAYERS) * 5 * WEIGHT_BODY_SIZE);
-    loginfo("Read 850 hPa weights\n");
+    logdebug("Read 850 hPa weights\n");
     readNetworkSegment(fw700, w700, (SAMPLE_SIZE + HIDDEN_LAYERS) * 5 * WEIGHT_BODY_SIZE);
-    loginfo("Read 700 hPa weights\n");
+    logdebug("Read 700 hPa weights\n");
     readNetworkSegment(fw500, w500, (SAMPLE_SIZE + HIDDEN_LAYERS) * 5 * WEIGHT_BODY_SIZE);
-    loginfo("Read 500 hPa weights\n");
+    logdebug("Read 500 hPa weights\n");
     readNetworkSegment(fw250, w250, (SAMPLE_SIZE + HIDDEN_LAYERS) * 5 * WEIGHT_TOP_SIZE);
-    loginfo("Read 250 hPa weights\n");
+    logdebug("Read 250 hPa weights\n");
   
   }
 
@@ -538,33 +538,33 @@ extern "C"
     rewind(fw700);
     rewind(fw500);
     rewind(fw250);
-    loginfo("Rewind...\n");
+    logdebug("Rewind...\n");
     
     fwrite(n1000, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 7 * GRID_SIZE, fn1000);
-    loginfo("Write 1000 hPa\n");
+    logdebug("Write 1000 hPa\n");
     fwrite(n925, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE, fn925);
-    loginfo("Write 925 hPa\n");
+    logdebug("Write 925 hPa\n");
     fwrite(n850, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE, fn850);
-    loginfo("Write 850 hPa\n");
+    logdebug("Write 850 hPa\n");
     fwrite(n700, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE, fn700);
-    loginfo("Write 700 hPa\n");
+    logdebug("Write 700 hPa\n");
     fwrite(n500, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE, fn500);
-    loginfo("Write 500 hPa\n");
+    logdebug("Write 500 hPa\n");
     fwrite(n250, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS + 1) * 5 * GRID_SIZE, fn250);
-    loginfo("Write 250 hPa\n");
+    logdebug("Write 250 hPa\n");
 
     fwrite(w1000, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS) * 7 * WEIGHT_SURF_SIZE, fw1000);
-    loginfo("Write 1000 hPa weights\n");
+    logdebug("Write 1000 hPa weights\n");
     fwrite(w925, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS) * 5 * WEIGHT_CSUR_SIZE, fw925);
-    loginfo("Write 925 hPa weights\n");
+    logdebug("Write 925 hPa weights\n");
     fwrite(w850, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS) * 5 * WEIGHT_BODY_SIZE, fw850);
-    loginfo("Write 850 hPa weights\n");
+    logdebug("Write 850 hPa weights\n");
     fwrite(w700, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS) * 5 * WEIGHT_BODY_SIZE, fw700);
-    loginfo("Write 700 hPa weights\n");
+    logdebug("Write 700 hPa weights\n");
     fwrite(w500, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS) * 5 * WEIGHT_BODY_SIZE, fw500);
-    loginfo("Write 500 hPa weights\n");
+    logdebug("Write 500 hPa weights\n");
     fwrite(w250, sizeof(float), (SAMPLE_SIZE + HIDDEN_LAYERS) * 5 * WEIGHT_TOP_SIZE, fw250);
-    loginfo("Write 250 hPa weights\n");
+    logdebug("Write 250 hPa weights\n");
   }
 
   void closeNetwork()
@@ -583,7 +583,7 @@ extern "C"
     fclose(fw500);
     fclose(fw250);
 
-    loginfo("Closed network\n");
+    logdebug("Closed network\n");
   }
 
   void openData(char * year)
@@ -652,7 +652,7 @@ extern "C"
     strcpy(buf, "Opened all NetCDF files for the year ");
     strcat(buf, year);
     strcat(buf, "\n");
-    loginfo(buf);
+    logdebug(buf);
   }
 
   void readData(int timeind, int ssttimeind, \
@@ -693,11 +693,15 @@ extern "C"
     // is lost for converted files so that is manually inputted (scale factor and offset).
 
     // Y + 1 goes south from Y, X - 1 goes west from X
-    size_t lstart[3] = {timeind, Y + 1, X - 1};
-    size_t lcount[3] = {1, HEIGHT, WIDTH};
+//    size_t lstart[3] = {timeind, Y + 1, X - 1};
+//    size_t lcount[3] = {1, HEIGHT, WIDTH};
+    size_t lstart[3] = {timeind, 0, 0};
+    size_t lcount[3] = {1, G_HEIGHT, G_WIDTH};
 
-    size_t istart[2] = {Y + 1, X - 1};
-    size_t icount[2] = {HEIGHT, WIDTH}; 
+//    size_t istart[2] = {Y + 1, X - 1};
+//    size_t icount[2] = {HEIGHT, WIDTH}; 
+    size_t istart[2] = {0, 0};
+    size_t icount[2] = {G_HEIGHT - 1, G_WIDTH}; 
    
     float scale_factor = 0;
     float add_offset = 0;
@@ -759,8 +763,10 @@ extern "C"
 
   void unpackLevel(int timeind, int ncid, int varid, int sector, int levind, float * node, int offset, int len)
   {
-    size_t lstart[4] = {timeind, levind, Y + 1, X - 1};
-    size_t lcount[4] = {1, 1, HEIGHT, WIDTH};
+//    size_t lstart[4] = {timeind, levind, Y + 1, X - 1};
+//    size_t lcount[4] = {1, 1, HEIGHT, WIDTH};
+    size_t lstart[4] = {timeind, levind, 0, 0};
+    size_t lcount[4] = {1, 1, G_HEIGHT, G_WIDTH};
 
     short * buf = (short *) calloc(GRID_SIZE, sizeof(short));
     float scale_factor = 0;
@@ -808,7 +814,7 @@ extern "C"
     nc_close(vwnd_ncid);
     nc_close(mask_ncid);
 
-    loginfo("Closed all NetCDF files\n");
+    logdebug("Closed all NetCDF files\n");
   }
 
   void unpackShortInto(short * buf, float * node, int sector, float scale_factor, float add_offset, \
@@ -830,7 +836,7 @@ extern "C"
   char * getYear()
   {
     int year = 0;
-    loginfo("Year (1982-2013, anything else to exit)? ");
+    logdebug("Year (1982-2013, anything else to exit)? ");
     if(scanf("%d", &year) != 1)
       exit(EXIT_FAILURE);
 
@@ -882,14 +888,16 @@ extern "C"
     int woffset = sbot + smid + stop;
 
     int weightind = sector * (GRID_SIZE * (sbot + smid + stop)) * mul \
-		  + y * (WIDTH * (sbot + smid + stop)) * mul \
+/*		  + y * (WIDTH * (sbot + smid + stop)) * mul \*/
+		  + y * (G_WIDTH * (sbot + smid + stop)) * mul \
 		  + x * (sbot + smid + stop) * mul;
     int sizes[3] = {sbot, smid, stop};
     int noffsets[3] = {bnoffset, noffset, tnoffset};
     float * nodes[3] = {bottom, node, top};
     int aindices[3] = {bindex, mindex, tindex};
 
-    int nodeind = sector * GRID_SIZE + y * WIDTH + x;
+//    int nodeind = sector * GRID_SIZE + y * WIDTH + x;
+    int nodeind = sector * GRID_SIZE + y * G_WIDTH + x;
     float total = 0;
 
     // printf("%d %d %d %d %d\n", level, sector, x, y, noffset);
@@ -906,8 +914,10 @@ extern "C"
                 total += weights[WEIGHT_OFFSETS[mindex * WEIGHT_OFFSET_BLOCK + level - 1] + j * woffset + weightind \
                                  + subtotal + x1 * 9 + y1 * 3 + z1] \
                        * nodes[i][NODE_OFFSETS[aindices[i] * NODE_OFFSET_BLOCK + level - 1] + j * noffsets[i] \
-                                  + x1 * GRID_SIZE + wrap((y + (y1 - 1)), 0, HEIGHT) * WIDTH \
-                       + wrap((x + (z1 - 1)), 0, WIDTH)];
+/*                                  + x1 * GRID_SIZE + wrap((y + (y1 - 1)), 0, HEIGHT) * WIDTH \*/
+                                  + x1 * GRID_SIZE + wrap((y + (y1 - 1)), 0, G_HEIGHT) * G_WIDTH \
+//                       + wrap((x + (z1 - 1)), 0, WIDTH)];
+                       + wrap((x + (z1 - 1)), 0, G_WIDTH)];
         subtotal += sizes[i];
       }
     node[NODE_OFFSETS[mindex * NODE_OFFSET_BLOCK + level] + nodeind] = sigmoid(total, (level == 1 ? (45 * SAMPLE_SIZE) : 45));
@@ -916,29 +926,29 @@ extern "C"
   void updateNodes()
   {
     int i = 0, l = 0;
-    // int nblocks = (GRID_SIZE + 255) / 256;
+    int nblocks = (GRID_SIZE + 255) / 256;
     
     for(i = 1; i < HIDDEN_LAYERS + 2; i++)
     {
       for(l = 0; l < 7; l++)
-        updateNode<<<1, 1>>>(i, l, gw1000, gn1000, NULL, gn925, \
+        updateNode<<<nblocks, 256>>>(i, l, gw1000, gn1000, NULL, gn925, \
                              WEIGHT_SURF_NUM_1, WEIGHT_SURF_NUM_2, WEIGHT_SURF_NUM_3, 0, \
                              7 * GRID_SIZE, 5 * GRID_SIZE, 999, 0, 1, NODE_OFFSETS, WEIGHT_OFFSETS);
       for(l = 0; l < 5; l++)
       {
-        updateNode<<<1, 1>>>(i, l, gw925, gn925, gn1000, gn850, \
+        updateNode<<<nblocks, 256>>>(i, l, gw925, gn925, gn1000, gn850, \
                              WEIGHT_CSUR_NUM_1, WEIGHT_CSUR_NUM_2, WEIGHT_CSUR_NUM_3, \
                              7 * GRID_SIZE, 5 * GRID_SIZE, 5 * GRID_SIZE, 0, 1, 2, NODE_OFFSETS, WEIGHT_OFFSETS);
-        updateNode<<<1, 1>>>(i, l, gw850, gn850, gn925, gn700, \
+        updateNode<<<nblocks, 256>>>(i, l, gw850, gn850, gn925, gn700, \
                              WEIGHT_BODY_NUM_1, WEIGHT_BODY_NUM_2, WEIGHT_BODY_NUM_3, \
                              5 * GRID_SIZE, 5 * GRID_SIZE, 5 * GRID_SIZE, 1, 2, 3, NODE_OFFSETS, WEIGHT_OFFSETS);
-        updateNode<<<1, 1>>>(i, l, gw700, gn700, gn850, gn500, \
+        updateNode<<<nblocks, 256>>>(i, l, gw700, gn700, gn850, gn500, \
                              WEIGHT_BODY_NUM_1, WEIGHT_BODY_NUM_2, WEIGHT_BODY_NUM_3, \
                              5 * GRID_SIZE, 5 * GRID_SIZE, 5 * GRID_SIZE, 2, 3, 4, NODE_OFFSETS, WEIGHT_OFFSETS);
-        updateNode<<<1, 1>>>(i, l, gw500, gn500, gn700, gn250, \
+        updateNode<<<nblocks, 256>>>(i, l, gw500, gn500, gn700, gn250, \
                              WEIGHT_BODY_NUM_1, WEIGHT_BODY_NUM_2, WEIGHT_BODY_NUM_3, \
                              5 * GRID_SIZE, 5 * GRID_SIZE, 5 * GRID_SIZE, 3, 4, 5, NODE_OFFSETS, WEIGHT_OFFSETS);
-        updateNode<<<1, 1>>>(i, l, gw250, gn250, gn500, NULL, \
+        updateNode<<<nblocks, 256>>>(i, l, gw250, gn250, gn500, NULL, \
                              WEIGHT_TOP_NUM_1, WEIGHT_TOP_NUM_2, WEIGHT_TOP_NUM_3, \
                              5 * GRID_SIZE, 5 * GRID_SIZE, 0, 4, 5, 999, NODE_OFFSETS, WEIGHT_OFFSETS);
       }
@@ -965,7 +975,8 @@ extern "C"
 
     if(isOutput)
     {
-      const int index = sector * GRID_SIZE + i * WIDTH + j;
+//      const int index = sector * GRID_SIZE + i * WIDTH + j;
+      const int index = sector * GRID_SIZE + i * G_WIDTH + j;
       error[NODE_OFFSETS[mindex * NODE_OFFSET_BLOCK + level] + index] = node[NODE_OFFSETS[mindex * NODE_OFFSET_BLOCK + level] \
                                                                             + index] \
                                                                       * (1 - node[NODE_OFFSETS[mindex * NODE_OFFSET_BLOCK + level] \
@@ -991,21 +1002,27 @@ extern "C"
                 for(z1 = 0; z1 < 3; z1++)
                 {
 		  const int windex = x1 * (GRID_SIZE * chunks[k]) \
-                               + wrap(i + (y1 - 1), 0, HEIGHT) * (WIDTH * chunks[k]) \
-                               + wrap(j + (z1 - 1), 0, WIDTH) * chunks[k]; // level
+/*                               + wrap(i + (y1 - 1), 0, HEIGHT) * (WIDTH * chunks[k]) \*/
+                               + wrap(i + (y1 - 1), 0, G_HEIGHT) * (G_WIDTH * chunks[k]) \
+//                               + wrap(j + (z1 - 1), 0, WIDTH) * chunks[k]; // level
+                               + wrap(j + (z1 - 1), 0, G_WIDTH) * chunks[k]; // level
                   const int eindex = x1 * GRID_SIZE; // level + 1
                   total += errors[k][NODE_OFFSETS[aindices[k] * NODE_OFFSET_BLOCK + level + 1] + eindex \
-                                     + wrap(i + (y1 - 1), 0, HEIGHT) * WIDTH + wrap(j + (z1 - 1), 0, WIDTH)] \
+/*                                     + wrap(i + (y1 - 1), 0, HEIGHT) * WIDTH + wrap(j + (z1 - 1), 0, WIDTH)] \*/
+                                     + wrap(i + (y1 - 1), 0, G_HEIGHT) * WIDTH + wrap(j + (z1 - 1), 0, G_WIDTH)] \
                          * weights[k][WEIGHT_OFFSETS[aindices[k] * WEIGHT_OFFSET_BLOCK + level] \
                                       + l * chunks[k] + windex + add[k] + sector * 9 + (2 - y1) * 3 + (2 - z1)];
                 }
 	  }
 	}
         error[NODE_OFFSETS[mindex * NODE_OFFSET_BLOCK + level] \
-              + l * noffset + index + i * WIDTH + j] = node[NODE_OFFSETS[mindex * NODE_OFFSET_BLOCK + level] \
-                                                     + l * noffset + index + i * WIDTH + j] \
+/*              + l * noffset + index + i * WIDTH + j] = node[NODE_OFFSETS[mindex * NODE_OFFSET_BLOCK + level] \*/
+              + l * noffset + index + i * G_WIDTH + j] = node[NODE_OFFSETS[mindex * NODE_OFFSET_BLOCK + level] \
+/*                                                     + l * noffset + index + i * WIDTH + j] \*/
+                                                     + l * noffset + index + i * G_WIDTH + j] \
                                                      * (1 - node[NODE_OFFSETS[mindex * NODE_OFFSET_BLOCK + level] \
-                                                          + l * noffset + index + i * WIDTH + j]) * total;
+//                                                          + l * noffset + index + i * WIDTH + j]) * total;
+                                                          + l * noffset + index + i * G_WIDTH + j]) * total;
       }
     }
   }
@@ -1015,22 +1032,22 @@ extern "C"
 
     // simple
     int i = 0, j = 0;
-    // int nblocks = (GRID_SIZE + 255) / 256;
+    int nblocks = (GRID_SIZE + 255) / 256;
 
     for(i = 0; i < 7; i++)
-      updateError<<<1, 1>>>(HIDDEN_LAYERS + 1, i, gw1000, NULL, gw925, gn1000, gnn1000, ge1000, NULL, ge925, \
+      updateError<<<nblocks, 256>>>(HIDDEN_LAYERS + 1, i, gw1000, NULL, gw925, gn1000, gnn1000, ge1000, NULL, ge925, \
                             0, 0, 0, 0, 0, 0, 0, true, 7 * GRID_SIZE, 999, 0, 1, NODE_OFFSETS, WEIGHT_OFFSETS);
     for(i = 0; i < 5; i++)
     {
-      updateError<<<1, 1>>>(HIDDEN_LAYERS + 1, i, gw925, gw1000, gw850, gn925, gnn925, ge925, ge1000, ge850, \
+      updateError<<<nblocks, 256>>>(HIDDEN_LAYERS + 1, i, gw925, gw1000, gw850, gn925, gnn925, ge925, ge1000, ge850, \
                             0, 0, 0, 0, 0, 0, 0, true, 5 * GRID_SIZE, 0, 1, 2, NODE_OFFSETS, WEIGHT_OFFSETS);
-      updateError<<<1, 1>>>(HIDDEN_LAYERS + 1, i, gw850, gw925, gw700, gn850, gnn850, ge850, ge925, ge700, \
+      updateError<<<nblocks, 256>>>(HIDDEN_LAYERS + 1, i, gw850, gw925, gw700, gn850, gnn850, ge850, ge925, ge700, \
                             0, 0, 0, 0, 0, 0, 0, true, 5 * GRID_SIZE, 1, 2, 3, NODE_OFFSETS, WEIGHT_OFFSETS);
-      updateError<<<1, 1>>>(HIDDEN_LAYERS + 1, i, gw700, gw850, gw500, gn700, gnn700, ge700, ge850, ge500, \
+      updateError<<<nblocks, 256>>>(HIDDEN_LAYERS + 1, i, gw700, gw850, gw500, gn700, gnn700, ge700, ge850, ge500, \
                             0, 0, 0, 0, 0, 0, 0, true, 5 * GRID_SIZE, 2, 3, 4, NODE_OFFSETS, WEIGHT_OFFSETS);
-      updateError<<<1, 1>>>(HIDDEN_LAYERS + 1, i, gw500, gw700, gw250, gn500, gnn500, ge500, ge700, ge250, \
+      updateError<<<nblocks, 256>>>(HIDDEN_LAYERS + 1, i, gw500, gw700, gw250, gn500, gnn500, ge500, ge700, ge250, \
                             0, 0, 0, 0, 0, 0, 0, true, 5 * GRID_SIZE, 3, 4, 5, NODE_OFFSETS, WEIGHT_OFFSETS);
-      updateError<<<1, 1>>>(HIDDEN_LAYERS + 1, i, gw250, gw500, NULL, gn250, gnn250, ge250, ge500, NULL, \
+      updateError<<<nblocks, 256>>>(HIDDEN_LAYERS + 1, i, gw250, gw500, NULL, gn250, gnn250, ge250, ge500, NULL, \
                             0, 0, 0, 0, 0, 0, 0, true, 5 * GRID_SIZE, 4, 5, 999, NODE_OFFSETS, WEIGHT_OFFSETS);
     }
 
@@ -1040,33 +1057,33 @@ extern "C"
     for(j = HIDDEN_LAYERS; j > -1; j--)
     {
       for(i = 0; i < 7; i++)
-	updateError<<<1, 1>>>(j, i, gw1000, NULL, gw925, gn1000, NULL, ge1000, NULL, ge925, \
+	updateError<<<nblocks, 256>>>(j, i, gw1000, NULL, gw925, gn1000, NULL, ge1000, NULL, ge925, \
                     WEIGHT_SURF_NUM_1, WEIGHT_SURF_NUM_2, WEIGHT_SURF_NUM_3, \
 		    0, WEIGHT_CSUR_NUM_1 + WEIGHT_CSUR_NUM_2 + WEIGHT_CSUR_NUM_3, 0, \
                     0, false, 7 * GRID_SIZE, 999, 0, 1, NODE_OFFSETS, WEIGHT_OFFSETS);
       for(i = 0; i < 5; i++)
       {
-	updateError<<<1, 1>>>(j, i, gw925, gw1000, gw850, gn925, NULL, ge925, ge1000, ge850, \
+	updateError<<<nblocks, 256>>>(j, i, gw925, gw1000, gw850, gn925, NULL, ge925, ge1000, ge850, \
                               WEIGHT_CSUR_NUM_1, WEIGHT_CSUR_NUM_2, WEIGHT_CSUR_NUM_3, \
                               WEIGHT_SURF_NUM_1 + WEIGHT_SURF_NUM_2 + WEIGHT_SURF_NUM_3, \
                               WEIGHT_BODY_NUM_1 + WEIGHT_BODY_NUM_2 + WEIGHT_BODY_NUM_3, WEIGHT_SURF_NUM_1 + WEIGHT_SURF_NUM_2, \
                               0, false, 5 * GRID_SIZE, 0, 1, 2, NODE_OFFSETS, WEIGHT_OFFSETS);
-	updateError<<<1, 1>>>(j, i, gw850, gw925, gw700, gn850, NULL, ge850, ge925, ge700, \
+	updateError<<<nblocks, 256>>>(j, i, gw850, gw925, gw700, gn850, NULL, ge850, ge925, ge700, \
                               WEIGHT_BODY_NUM_1, WEIGHT_BODY_NUM_2, WEIGHT_BODY_NUM_3, \
                               WEIGHT_CSUR_NUM_1 + WEIGHT_CSUR_NUM_2 + WEIGHT_CSUR_NUM_3, \
                               WEIGHT_BODY_NUM_1 + WEIGHT_BODY_NUM_2 + WEIGHT_BODY_NUM_3, WEIGHT_CSUR_NUM_1 + WEIGHT_CSUR_NUM_2, \
                               0, false, 5 * GRID_SIZE, 1, 2, 3, NODE_OFFSETS, WEIGHT_OFFSETS);
-	updateError<<<1, 1>>>(j, i, gw700, gw850, gw500, gn700, NULL, ge700, ge850, ge500, \
+	updateError<<<nblocks, 256>>>(j, i, gw700, gw850, gw500, gn700, NULL, ge700, ge850, ge500, \
                               WEIGHT_BODY_NUM_1, WEIGHT_BODY_NUM_2, WEIGHT_BODY_NUM_3, \
                               WEIGHT_BODY_NUM_1 + WEIGHT_BODY_NUM_2 + WEIGHT_BODY_NUM_3, \
                               WEIGHT_BODY_NUM_1 + WEIGHT_BODY_NUM_2 + WEIGHT_BODY_NUM_3, WEIGHT_BODY_NUM_1 + WEIGHT_BODY_NUM_2, \
                               0, false, 5 * GRID_SIZE, 2, 3, 4, NODE_OFFSETS, WEIGHT_OFFSETS);
-        updateError<<<1, 1>>>(j, i, gw500, gw700, gw250, gn500, NULL, ge500, ge700, ge250, \
+        updateError<<<nblocks, 256>>>(j, i, gw500, gw700, gw250, gn500, NULL, ge500, ge700, ge250, \
                               WEIGHT_BODY_NUM_1, WEIGHT_BODY_NUM_2, WEIGHT_BODY_NUM_3, \
 	                      WEIGHT_BODY_NUM_1 + WEIGHT_BODY_NUM_2 + WEIGHT_BODY_NUM_3, \
                               WEIGHT_TOP_NUM_1 + WEIGHT_TOP_NUM_2 + WEIGHT_TOP_NUM_3, WEIGHT_BODY_NUM_1 + WEIGHT_BODY_NUM_2, \
                               0, false, 5 * GRID_SIZE, 3, 4, 5, NODE_OFFSETS, WEIGHT_OFFSETS);
-	updateError<<<1, 1>>>(j, i, gw250, gw500, NULL, gn250, NULL, ge250, ge500, NULL, \
+	updateError<<<nblocks, 256>>>(j, i, gw250, gw500, NULL, gn250, NULL, ge250, ge500, NULL, \
                               WEIGHT_TOP_NUM_1, WEIGHT_TOP_NUM_2, WEIGHT_TOP_NUM_3, \
                               WEIGHT_BODY_NUM_1 + WEIGHT_BODY_NUM_2 + WEIGHT_BODY_NUM_3, 0, WEIGHT_BODY_NUM_1 + WEIGHT_BODY_NUM_2, \
                               0, false, 5 * GRID_SIZE, 4, 5, 999, NODE_OFFSETS, WEIGHT_OFFSETS);
@@ -1100,11 +1117,14 @@ extern "C"
               for(l = 0; l < (level == 1 ? SAMPLE_SIZE : 1); l++)
 	      {
 		const int windex = sector * (GRID_SIZE * (sbot + smid + stop)) + \
-                                   i * (WIDTH * (sbot + smid + stop)) + \
+/*                                   i * (WIDTH * (sbot + smid + stop)) + \*/
+                                   i * (G_WIDTH * (sbot + smid + stop)) + \
                                    j * (sbot + smid + stop) + \
                                    subtotal + x1 * 9 + y1 * 3 + z1;
-		const int eindex = sector * GRID_SIZE + i * WIDTH + j;
-		const int nindex = x1 * GRID_SIZE + wrap(i + (y1 - 1), 0, HEIGHT) *  WIDTH + wrap(j + (z1 - 1), 0, WIDTH);
+//		const int eindex = sector * GRID_SIZE + i * WIDTH + j;
+		const int eindex = sector * GRID_SIZE + i * G_WIDTH + j;
+//		const int nindex = x1 * GRID_SIZE + wrap(i + (y1 - 1), 0, HEIGHT) *  WIDTH + wrap(j + (z1 - 1), 0, WIDTH);
+		const int nindex = x1 * GRID_SIZE + wrap(i + (y1 - 1), 0, G_HEIGHT) *  G_WIDTH + wrap(j + (z1 - 1), 0, G_WIDTH);
 		weight[WEIGHT_OFFSETS[mindex * WEIGHT_OFFSET_BLOCK + level - 1] \
                        + l * woffset + windex] += LEARNING_RATE * error[NODE_OFFSETS[mindex * NODE_OFFSET_BLOCK + level] \
                                                                         + l * noffset + eindex] \
@@ -1118,28 +1138,28 @@ extern "C"
   void updateWeights()
   {
     int i = 0, j = 0;
-    // int nblocks = (GRID_SIZE + 255) / 256;
+    int nblocks = (GRID_SIZE + 255) / 256;
     for (j = HIDDEN_LAYERS + 1; j > 0; j--)
     {
       for(i = 0; i < 7; i++)
-	updateWeight<<<1, 1>>>(j, i, gw1000, gn1000, NULL, gn925, ge1000, \
+	updateWeight<<<nblocks, 256>>>(j, i, gw1000, gn1000, NULL, gn925, ge1000, \
                                        WEIGHT_SURF_NUM_1, WEIGHT_SURF_NUM_2, WEIGHT_SURF_NUM_3, 7 * GRID_SIZE, 999, 0, 1, \
                                        NODE_OFFSETS, WEIGHT_OFFSETS);
       for(i = 0; i < 5; i++)
       {
-	updateWeight<<<1, 1>>>(j, i, gw925, gn925, gn1000, gn850, ge925, \
+	updateWeight<<<nblocks, 256>>>(j, i, gw925, gn925, gn1000, gn850, ge925, \
                                        WEIGHT_CSUR_NUM_1, WEIGHT_CSUR_NUM_2, WEIGHT_CSUR_NUM_3, 5 * GRID_SIZE, 0, 1, 2, \
                                        NODE_OFFSETS, WEIGHT_OFFSETS);
-	updateWeight<<<1, 1>>>(j, i, gw850, gn850, gn925, gn700, ge850, \
+	updateWeight<<<nblocks, 256>>>(j, i, gw850, gn850, gn925, gn700, ge850, \
                                        WEIGHT_BODY_NUM_1, WEIGHT_BODY_NUM_2, WEIGHT_BODY_NUM_3, 5 * GRID_SIZE, 1, 2, 3, \
                                        NODE_OFFSETS, WEIGHT_OFFSETS);
-	updateWeight<<<1, 1>>>(j, i, gw700, gn700, gn850, gn500, ge700, \
+	updateWeight<<<nblocks, 256>>>(j, i, gw700, gn700, gn850, gn500, ge700, \
                                        WEIGHT_BODY_NUM_1, WEIGHT_BODY_NUM_2, WEIGHT_BODY_NUM_3, 5 * GRID_SIZE, 2, 3, 4, \
                                        NODE_OFFSETS, WEIGHT_OFFSETS);
-	updateWeight<<<1, 1>>>(j, i, gw500, gn500, gn700, gn250, ge500, \
+	updateWeight<<<nblocks, 256>>>(j, i, gw500, gn500, gn700, gn250, ge500, \
                                        WEIGHT_BODY_NUM_1, WEIGHT_BODY_NUM_2, WEIGHT_BODY_NUM_3, 5 * GRID_SIZE, 3, 4, 5, \
                                        NODE_OFFSETS, WEIGHT_OFFSETS);
-	updateWeight<<<1, 1>>>(j, i, gw250, gn250, gn500, NULL, ge250, \
+	updateWeight<<<nblocks, 256>>>(j, i, gw250, gn250, gn500, NULL, ge250, \
                                        WEIGHT_TOP_NUM_1, WEIGHT_TOP_NUM_2, WEIGHT_TOP_NUM_3, 5 * GRID_SIZE, 4, 5, 6, \
                                        NODE_OFFSETS, WEIGHT_OFFSETS);
       }
@@ -1169,9 +1189,12 @@ extern "C"
     int i = 0, j = 0, k = 0;
     float total = 0;
     for(i = 0; i < sectorCount; i++)
-      for(j = 0; j < HEIGHT; j++)
-	for(k = 0; k < WIDTH; k++)
-	  total += powf(error[NODE_OFFSETS[eindex * NODE_OFFSET_BLOCK + HIDDEN_LAYERS + 1] + i * GRID_SIZE + j * WIDTH + k], 2.0f);
+//      for(j = 0; j < HEIGHT; j++)
+//	for(k = 0; k < WIDTH; k++)
+      for(j = 0; j < G_HEIGHT; j++)
+	for(k = 0; k < G_WIDTH; k++)
+//	  total += powf(error[NODE_OFFSETS[eindex * NODE_OFFSET_BLOCK + HIDDEN_LAYERS + 1] + i * GRID_SIZE + j * WIDTH + k], 2.0f);
+	  total += powf(error[NODE_OFFSETS[eindex * NODE_OFFSET_BLOCK + HIDDEN_LAYERS + 1] + i * GRID_SIZE + j * G_WIDTH + k], 2.0f);
     toterr += total;
   }
   
@@ -1206,11 +1229,11 @@ extern "C"
     snprintf(buf, 255, "../forecast/forecast.%.4s.%d.%03dhr.nc", year, index, timelapse);
 
     e_netcdf(nc_create(buf, NC_CLOBBER, &forecastncid));
-    loginfo("Created NetCDF file...\n");
+    logdebug("Created NetCDF file...\n");
     e_netcdf(nc_def_dim(forecastncid, "level", 6, &datadimids[0]));
     e_netcdf(nc_def_dim(forecastncid, "lat", 3, &datadimids[1]));
     e_netcdf(nc_def_dim(forecastncid, "lon", 3, &datadimids[2]));
-    loginfo("Created dimensions...\n");
+    logdebug("Created dimensions...\n");
 
     londimids[0] = datadimids[2];
     latdimids[0] = datadimids[1];
@@ -1223,7 +1246,7 @@ extern "C"
     e_netcdf(nc_def_var(forecastncid, "lon", NC_FLOAT, 1, londimids, &varids[8]));
     e_netcdf(nc_def_var(forecastncid, "lat", NC_FLOAT, 1, latdimids, &varids[9]));
     
-    loginfo("Defined all vars...\n");
+    logdebug("Defined all vars...\n");
   
     e_netcdf(nc_put_att_text(forecastncid, varids[7], "units", 8, "millibar"));
     e_netcdf(nc_put_att_text(forecastncid, varids[8], "units", 11, "degree_east"));
@@ -1243,7 +1266,7 @@ extern "C"
     for(i = 0; i < 7; i++)
       e_netcdf(nc_put_att_text(forecastncid, varids[i], "units", strlen(units[i]), units[i]));
 
-    loginfo("Defined all attributes..\n");
+    logdebug("Defined all attributes..\n");
  
     e_netcdf(nc_enddef(forecastncid));
     
@@ -1256,7 +1279,8 @@ extern "C"
     nc_put_var_float(forecastncid, varids[8], lon);
     nc_put_var_float(forecastncid, varids[9], lat);
 
-    const size_t count[] = {1, HEIGHT, WIDTH};
+//    const size_t count[] = {1, HEIGHT, WIDTH};
+    const size_t count[] = {1, G_HEIGHT, G_WIDTH};
    
     int k = 0, l = 0;
     for(i = 0; i < 6; i++)
@@ -1265,18 +1289,21 @@ extern "C"
       for(j = 0; j < lengths[i]; j++)
       {
         float scaled[9];
-        for(k = 0; k < HEIGHT; k++)
-          for(l = 0; l < WIDTH; l++)
-            scaled[k * WIDTH + l] = nodes[i][H_NODE_OFFSETS[i * NODE_OFFSET_BLOCK + HIDDEN_LAYERS + 1] \
+//        for(k = 0; k < HEIGHT; k++)
+//          for(l = 0; l < WIDTH; l++)
+        for(k = 0; k < G_HEIGHT; k++)
+          for(l = 0; l < G_WIDTH; l++)
+            scaled[k * G_WIDTH + l] = nodes[i][H_NODE_OFFSETS[i * NODE_OFFSET_BLOCK + HIDDEN_LAYERS + 1] \
+/*            scaled[k * WIDTH + l] = nodes[i][H_NODE_OFFSETS[i * NODE_OFFSET_BLOCK + HIDDEN_LAYERS + 1] \*/
                                              + j * GRID_SIZE + k * 3 + l] * (var_max[j] - var_min[j]) + var_min[j];
         e_netcdf(nc_put_vara_float(forecastncid, varids[j], start, count, scaled));
       }
     }
 
-    loginfo("Put all vars...\n"); 
+    logdebug("Put all vars...\n"); 
 
     e_netcdf(nc_close(forecastncid));
-    loginfo("Closed NetCDF file...\n");
+    logdebug("Closed NetCDF file...\n");
   }
 
   void displayNetwork(int sector, int layer, int level, float * network)
@@ -1285,11 +1312,14 @@ extern "C"
     char * ascii = "*WMB8&%$#@oahkbdpqwmLCJUYXZO0Qrcvunxzjft/\\|()1{}[]-_+<>i!lI?.'`,^:\";~";
     float stval = 0.0f, endval = 1.0f;
 
-    for(i = 0; i < HEIGHT; i++)
+//    for(i = 0; i < HEIGHT; i++)
+    for(i = 0; i < G_HEIGHT; i++)
     {
-      for(j = 0; j < WIDTH; j++)
+//      for(j = 0; j < WIDTH; j++)
+      for(j = 0; j < G_WIDTH; j++)
       {
-        float value = network[H_NODE_OFFSETS[level * NODE_OFFSET_BLOCK + layer] + sector * GRID_SIZE + i * WIDTH + j];
+//        float value = network[H_NODE_OFFSETS[level * NODE_OFFSET_BLOCK + layer] + sector * GRID_SIZE + i * WIDTH + j];
+        float value = network[H_NODE_OFFSETS[level * NODE_OFFSET_BLOCK + layer] + sector * GRID_SIZE + i * G_WIDTH + j];
         int index = floor((value - stval) / (endval - stval) * (strlen(ascii) - 1));
         if(value >= stval && value <= endval)
           printf("%.1s", ascii + index);
@@ -1317,12 +1347,12 @@ extern "C"
     readNetwork(); 
 
     //
-    loginfo("Reading time information...\n");
+    logdebug("Reading time information...\n");
     char * buf_year = (strcmp(year, "-1") == 0 ? getYear() : year);
     openData(buf_year);
     safeFree(buf_year);
 
-    loginfo("Reading time files...\n");
+    logdebug("Reading time files...\n");
     openTimes();
 
     int i = 0, j = 0, k = 0, l = 0;
@@ -1332,63 +1362,65 @@ extern "C"
     int reCount = 0;
     const int COUNT_THRESHOLD = 10000;
     const float ERROR_THRESHOLD = 0.00001f;
-    float outputError = 0; 
+    float outputError = 0, totMSE = 0; 
     int last = 0;
     do
     {
       j = 0;
 
-      for(k = SAMPLE_SIZE - 1; k < 16; k++) //timelen - 1 - SAMPLE_SIZE; i++)
+      for(k = SAMPLE_SIZE - 1; k < 64; k++) //timelen - 1 - SAMPLE_SIZE; i++)
       {
         last = i;
         while(i == last)
-          i = randrange(SAMPLE_SIZE - 1, 16);
+          i = randrange(SAMPLE_SIZE - 1, 64);
 
-        loginfo("Training index: ");
-        printf("%d\n", i);
+        logdebug("Training index: ");
+//        printf("%d\n", i);
 
 	char buf[128];
-	snprintf(buf, 127, "%.3f percent of time trained: %d/%d\n", \
+//	snprintf(buf, 127, "%.3f percent of time trained: %d/%d\n", \
 		 ((float) k) / (float) (timelen - 1) * 100, (int) k, (int) timelen);
-	loginfo(buf);    
+	logdebug(buf);    
 
 	while(j < stimelen - 1 && astime[j] <= atime[i])
 	  ++j;
 
 	readData(i, j, n1000, n925, n850, n700, n500, n250, SAMPLE_SIZE);
-	loginfo("Read data\n");
+	logdebug("Read data\n");
 	readData(i + 1, j, nn1000, nn925, nn850, nn700, nn500, nn250, 1);
-	loginfo("Checking data\n");
+	logdebug("Checking data\n");
 
         cudaRead();
 
-        for(l = 0; l < 30; l++)
+//        for(l = 0; l < 30; l++)
         {
 	  updateNodes();
-	  loginfo("Update nodes\n");
+	  logdebug("Update nodes\n");
 	  updateErrors();
-	  loginfo("Update errors\n");
+	  logdebug("Update errors\n");
 	  updateWeights();
-	  loginfo("Update weights\n");
+	  logdebug("Update weights\n");
 
 	  outputError = getOutputError();
-	  snprintf(buf, 127, "Total error: %f\n", outputError);
-	  loginfo(buf);
+	  snprintf(buf, 127, "\rTotal error: %f", outputError);
+	  logdebug(buf);
 
-          loginfo(" -- Updated ");
-          printf("%d times --\n", l);
-        } 
-      
+          totMSE += outputError;
+          logdebug(" -- Updated ");
+//          printf("%d times --\n", l);
+        }
         cudaWrite();
       }
+      logdebug("\n");
 
       reCount++;
 
       writeNetwork(); 
 
       char rebuf[128];
-      snprintf(rebuf, 127, "** Loop Count: %d **\n", reCount);
+      snprintf(rebuf, 127, "** Epoch %d SMSE=%.5f **\n", reCount, totMSE);
       loginfo(rebuf);
+      totMSE = 0;
     } while (reCount < COUNT_THRESHOLD && outputError > ERROR_THRESHOLD);
 
     fclose(debug);
@@ -1415,7 +1447,7 @@ extern "C"
     char * buf_year = (strcmp(year, "-1") == 0 ? getYear() : year);
     openData(buf_year);
 
-    loginfo("Reading time files...\n");
+    logdebug("Reading time files...\n");
     openTimes();
 
     if(index < SAMPLE_SIZE - 1 || index >= timelen)
@@ -1432,7 +1464,7 @@ extern "C"
     int timelapse = 6;
 
     readData(index, j, n1000, n925, n850, n700, n500, n250, SAMPLE_SIZE);
-    loginfo("Read data\n");
+    logdebug("Read data\n");
 
 // ---
     char buf[128];
@@ -1442,7 +1474,7 @@ extern "C"
     cudaRead();
 
     updateNodes();
-    loginfo("Update nodes\n");
+    logdebug("Update nodes\n");
 
 // ---
     updateErrors();
@@ -1453,29 +1485,29 @@ extern "C"
 // ---
     float outputError = getOutputError();
     snprintf(buf, 127, "Total error: %f\n", outputError);
-    loginfo(buf);
+    logdebug(buf);
 //
 
     checkNetworkSanity(0, 0, HIDDEN_LAYERS + 1);
 
     writeNetCDF(buf_year, index, timelapse);
-    loginfo("Write NetCDF data ");
+    logdebug("Write NetCDF data ");
     printf("%s yr %d index %d hr\n", buf_year, index, timelapse);
 
     for(timelapse = 12; timelapse <= 384; timelapse += 6)
     {
       loopNodes();
-      loginfo("Loopback data\n");
+      logdebug("Loopback data\n");
 
       cudaRead();
 
       updateNodes();
-      loginfo("Update nodes\n");
+      logdebug("Update nodes\n");
       
       cudaWrite();
 
       writeNetCDF(buf_year, index, timelapse); 
-      loginfo("Write NetCDF data\n");
+      logdebug("Write NetCDF data\n");
       printf("%s yr %d index %d hr\n", year, index, timelapse);
     }
 
